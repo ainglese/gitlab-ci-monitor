@@ -1,3 +1,5 @@
+const refreshInterval = 6000;
+
 const onError = function (error) {
   if (error.message === undefined) {
     if (error.response && error.response.status === 401) {
@@ -49,7 +51,11 @@ const app = new Vue({
     var self = this
     setInterval(function() {
       self.updateBuilds()
-    }, 60000)
+    }, refreshInterval)
+
+    self.pipelines.sort(function(a, b) { 
+		return (new Date(b.started_at).getTime() - new Date(a.started_at).getTime()); 
+	});
   },
   methods: {
     loadConfig: function() {
@@ -146,7 +152,8 @@ const app = new Vue({
       const self = this
       self.groups.forEach(function(g) {
         self.loading = true
-        axios.get('/groups/' + g)
+
+        axios.get('/groups/' + encodeURIComponent(g))
           .then(function (response) {
             self.loading = false
             response.data.projects.forEach(function(project) {
